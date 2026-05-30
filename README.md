@@ -12,6 +12,32 @@ To check out live examples and docs, visit [pycinrad.cn](https://pycinrad.cn/).
 
 **`example` folder contains detailed examples!**
 
+## What's New in This Version
+
+### Pure Python Implementation (No Cython Required)
+
+This version removes all Cython dependencies and provides a **pure Python + NumPy** implementation for all computational modules. This brings several benefits:
+
+- **Simplified Installation**: No C compiler or Cython required. Just `pip install` and go.
+- **Better Compatibility**: Works seamlessly on all platforms without compilation issues.
+- **Easier Development**: Pure Python code is easier to read, debug, and contribute to.
+
+### Performance Optimizations
+
+The pure Python implementation has been optimized using NumPy vectorization:
+
+| Function | Optimization |
+|:--|:--|
+| `vert_integrated_liquid` | Pre-computed Z values and elevation differences; vectorized inner loops |
+| `echo_top` | Pre-computed height arrays; optimized threshold detection |
+| `unwrap_2d` | NumPy advanced indexing instead of Python loops; proper mask handling |
+
+### Bug Fixes
+
+- **Fixed `distance` mutation**: The `vert_integrated_liquid_py` function no longer modifies the input `distance` array in-place.
+- **Fixed `unwrap_2d` mask handling**: Invalid pixels are now properly preserved during phase unwrapping.
+- **Fixed unit consistency**: `echo_top` now correctly handles `radarheight` units (meters to kilometers conversion).
+
 ## Installation
 
 PyCINRAD supports Python version 3.9 and higher.
@@ -27,6 +53,8 @@ git clone https://github.com/CyanideCN/PyCINRAD.git
 cd PyCINRAD
 pip install .
 ```
+
+No C compiler or Cython installation required!
 
 ## Modules
 
@@ -90,6 +118,8 @@ data = f.get_data(0, 40, 'REF')
 
 This submodule provides some useful algorithms in radar meteorology. All functions only accept `numpy.ndarray` as input data. This submodule extends the usage of this program, as these functions can accept customized data rather than only the data decoded by `cinrad.io`.
 
+**Note**: The VIL and echo top calculations are now implemented in pure Python with NumPy optimization. Performance is comparable to the previous Cython implementation.
+
 ### cinrad.calc
 
 For direct computation of decoded data, `cinrad.calc` provides functions that simplify the process of calculation. For functions contained in this submodule, only a list of reflectivity data is required as the argument.
@@ -132,7 +162,7 @@ This submodule provides algorithms to correct raw radar fields.
 
 #### cinrad.correct.dealias
 
-This function can unwrap the folded velocity using algorithm originated from `pyart`. (needs C compiler)
+This function can unwrap the folded velocity using 2D phase unwrapping algorithm.
 
 ```python
 import cinrad

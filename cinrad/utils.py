@@ -50,7 +50,7 @@ def vert_integrated_liquid_py(
     v_beam_width = np.deg2rad(beam_width)
     elev = np.deg2rad(elev)
     xshape, yshape = ref[0].shape
-    distance *= 1000
+    distance = distance * 1000
     hi_arr = distance * np.sin(v_beam_width / 2)
     vil = _vil_iter(xshape, yshape, ref, distance, elev, hi_arr, threshold)
     return vil
@@ -155,9 +155,4 @@ def echo_top_py(
     return et
 
 
-try:
-    from cinrad._utils import *
-except ImportError:
-    # When the C-extension doesn't exist, define the functions in Python.
-    echo_top = echo_top_py
-    vert_integrated_liquid = vert_integrated_liquid_py
+from cinrad._utils import echo_top, vert_integrated_liquid

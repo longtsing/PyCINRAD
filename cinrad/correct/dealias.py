@@ -4,16 +4,7 @@
 import numpy as np
 from xarray import Dataset
 
-try:
-    from cinrad.correct._unwrap_2d import unwrap_2d
-except ImportError:
-    from cinrad.error import RadarCalculationError, ExceptionOnCall
-
-    unwrap_2d = ExceptionOnCall(
-        RadarCalculationError,
-        "Cython is not installed, velocity dealias function cannot be used. If you "
-        "installed Cython after installing cinrad, please re-install cinrad.",
-    )
+from cinrad.correct._unwrap_2d import unwrap_2d
 
 
 def dealias_unwrap_2d(vdata: np.ndarray, nyquist_vel: float) -> np.ndarray:

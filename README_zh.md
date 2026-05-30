@@ -14,6 +14,32 @@ Decode CINRAD (China New Generation Weather Radar) data and visualize.
 
 **`example`文件夹里有详细的使用示例！**
 
+## 本版本更新内容
+
+### 纯 Python 实现（无需 Cython）
+
+本版本移除了所有 Cython 依赖，使用 **纯 Python + NumPy** 实现所有计算模块。这带来了以下优势：
+
+- **简化安装**：无需 C 编译器或 Cython，直接 `pip install` 即可使用。
+- **更好的兼容性**：在所有平台上无缝运行，无编译问题。
+- **更易开发**：纯 Python 代码更易阅读、调试和贡献。
+
+### 性能优化
+
+纯 Python 实现通过 NumPy 向量化进行了优化：
+
+| 函数 | 优化内容 |
+|:--|:--|
+| `vert_integrated_liquid` | 预计算 Z 值和仰角差；向量化内部循环 |
+| `echo_top` | 预计算高度数组；优化阈值检测 |
+| `unwrap_2d` | 使用 NumPy 高级索引替代 Python 循环；正确处理掩码 |
+
+### Bug 修复
+
+- **修复 `distance` 被意外修改的问题**：`vert_integrated_liquid_py` 函数不再原地修改输入的 `distance` 数组。
+- **修复 `unwrap_2d` 掩码处理**：无效像素现在能在相位解包裹过程中被正确保留。
+- **修复单位一致性问题**：`echo_top` 现在正确处理 `radarheight` 的单位（米到公里的转换）。
+
 ## 安装
 
 ### 安装方法
@@ -30,6 +56,8 @@ git clone https://github.com/CyanideCN/PyCINRAD.git
 cd PyCINRAD
 pip install .
 ```
+
+无需 C 编译器或 Cython 安装！
 
 ## 模块介绍
 
@@ -95,7 +123,7 @@ data = f.get_data(0, 40, 'REF')
 函数名：
 `composite_reflectivity`, `echo_tops`, `vert_integrated_liquid`
 
-计算ET和VIL时，考虑到速度问题，模块提供由cython转换而来的python扩展，可以大大提升速度。如果要使用此扩展，请安装cython以及C编译器，并重新安装此模块。（由pip直接安装的版本都是带有cython扩展的。）
+**注意**：VIL 和回波顶高的计算现在使用纯 Python + NumPy 优化实现，性能与之前的 Cython 实现相当。
 
 注：对于当反射率很强时，得到的VIL值可能会很大，这是因为该计算函数没有对强回波进行滤除，算法本身并无问题，如有滤除需要可以先使用`np.clip`将回波最大值设置为55dBZ再进行计算。
 
@@ -105,8 +133,6 @@ data = f.get_data(0, 40, 'REF')
 使用`cinrad.io`读取的数据可直接带入该模块下的函数来计算。
 
 传入一个包含每个仰角数据的list即可计算。
-
-注：当模块使用编译的C扩展的时候提供VIL密度的计算。
 
 列表生成示例：
 ```python
@@ -145,7 +171,7 @@ fig('D:\\')
 
 #### cinrad.correct.dealias
 
-利用`pyart`的算法进行速度退模糊。（需要C编译器）
+使用2D相位解包裹算法进行速度退模糊。
 
 ```python
 import cinrad
